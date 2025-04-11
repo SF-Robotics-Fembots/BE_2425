@@ -20,7 +20,7 @@ position = 9999
 
 #k values respective to p, i, and d
 #setpoint=target
-pid = PID(1, 0.1, 0.05, setpoint=1)
+pid = PID(1, 0.1, 0.05, setpoint=250)
 #system we want to control (motor)
 #depth = goTo() #0 should be neutrally bouyant
 
@@ -41,13 +41,15 @@ def goToTop():
 	print("top reached")
 
 
-def goTo(target_position):
-	global position
-	print("Starting Position = ", position)
+def goTo():
+	#global position
+	target_position = 10
+	current_position = 6
+	print("current_position = ", current_position, " target_position=", target_position)
 	if target_position < 0:
 		print("Can not move to position less than zero")
 		return
-	move_amount = target_position - position
+	move_amount = target_position - current_position
 	if target_position == 0:
 		goToTop()
 		return
@@ -55,11 +57,17 @@ def goTo(target_position):
 		p.ChangeDutyCycle(4)
 		while (move_amount > 0):
 			if (GPIO.input(ROTATE_SWITCH) == 0):  #wait for click
-				move_amount-=1 #reduce remaining amount to move by 1 rotation
-				position+=1
-				print("Position = ", position, "Move Amount = ", move_amount)
-				while(GPIO.input(ROTATE_SWITCH) == 0): #wait for unclick
+				move_amount -= 1 #reduce remaining amount to move by 1 rotation
+				#current_position +=1
+				current_position = input("current position?")
+				move_amount = target_position - int(current_position)
+				print("current_position = ", current_position, "Move Amount = ", move_amount)
+				if move_amount == 0:
+					break
+
+				'''while(GPIO.input(ROTATE_SWITCH) == 0): #wait for unclick
 					time.sleep(0.05)
+		'''
 		p.ChangeDutyCycle(7)
 
 	if move_amount < 0:
@@ -75,15 +83,17 @@ def goTo(target_position):
 
 	print("position reached")
 
+
 while True:
-	#compute new output from PID according to the systems current value
-	depth = goTo(0)
+#	#compute new output from PID according to the systems current value
+	depth = goTo()
 	control = pid(depth)
 	
 	#feed pid output to system and get its current value
 	depth = goTo(control, target_position)
 
-
-if __name__ == "__main__":
-	goToTop()
-	goTo(int(input()))
+#if __name__ == "__main__":
+	#goToTop()
+	#input current_position
+	#goTo(int(input()))
+#	goTo()

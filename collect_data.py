@@ -7,7 +7,6 @@ import threading
 sensor = ms5837.MS5837_02BA(1)
 DEBUG = 1
 
-time.sleep(2)
 
 def startup():
 #	print("prep to init")
